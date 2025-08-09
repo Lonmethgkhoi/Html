@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>API Manager</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+
+  <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-6 space-y-10">
+    <h1 class="text-2xl font-bold text-gray-700 text-center">API Management Dashboard</h1>
+
+    <!-- Blacklist IP -->
+    <section>
+      <h2 class="text-xl font-semibold text-gray-600 mb-4">Blacklist IP</h2>
+      <div class="flex gap-2">
+        <input id="blacklist-ip" type="text" placeholder="Enter IP" class="border rounded p-2 flex-1">
+        <button onclick="manageIP('add')" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Add</button>
+        <button onclick="manageIP('remove')" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Remove</button>
+      </div>
+      <pre id="blacklist-result" class="mt-3 bg-gray-50 p-3 rounded text-sm text-gray-700 overflow-auto"></pre>
+    </section>
+
+    <!-- Whitelist Key -->
+    <section>
+      <h2 class="text-xl font-semibold text-gray-600 mb-4">Whitelist Key</h2>
+      <div class="flex gap-2">
+        <input id="whitelist-key" type="text" placeholder="Enter Key" class="border rounded p-2 flex-1">
+        <button onclick="manageKey('add')" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add</button>
+        <button onclick="manageKey('remove')" class="bg-yellow-500 text-white px-4 py-2 rounded hover:bg-yellow-600">Remove</button>
+      </div>
+      <pre id="whitelist-result" class="mt-3 bg-gray-50 p-3 rounded text-sm text-gray-700 overflow-auto"></pre>
+    </section>
+
+    <!-- Test Key -->
+    <section>
+      <h2 class="text-xl font-semibold text-gray-600 mb-4">Test Key</h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <input id="data" type="text" placeholder="Data (Base64)" class="border rounded p-2">
+        <input id="iv" type="text" placeholder="IV (Base64)" class="border rounded p-2">
+      </div>
+      <button onclick="testKey()" class="mt-2 bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Test</button>
+      <pre id="test-result" class="mt-3 bg-gray-50 p-3 rounded text-sm text-gray-700 overflow-auto"></pre>
+    </section>
+  </div>
+
+<script>
+const API_BASE = "https://poisonxgetkey.ngxminhlong.workers.dev/"; // <-- sửa URL API của bạn
+
+function callAPI(path) {
+  return fetch(API_BASE + path)
+    .then(res => res.json())
+    .catch(err => ({ error: err.message }));
+}
+
+function manageIP(action) {
+  const ip = document.getElementById("blacklist-ip").value.trim();
+  if (!ip) return alert("Please enter IP");
+  callAPI(`/blacklist/ip?action=${action}&ip=${encodeURIComponent(ip)}`)
+    .then(data => document.getElementById("blacklist-result").textContent = JSON.stringify(data, null, 2));
+}
+
+function manageKey(action) {
+  const key = document.getElementById("whitelist-key").value.trim();
+  if (!key) return alert("Please enter Key");
+  callAPI(`/whitelist/key?action=${action}&key=${encodeURIComponent(key)}`)
+    .then(data => document.getElementById("whitelist-result").textContent = JSON.stringify(data, null, 2));
+}
+
+function testKey() {
+  const dataVal = document.getElementById("data").value.trim();
+  const ivVal = document.getElementById("iv").value.trim();
+  if (!dataVal || !ivVal) return alert("Please enter both Data and IV");
+  callAPI(`/?data=${encodeURIComponent(dataVal)}&iv=${encodeURIComponent(ivVal)}`)
+    .then(data => document.getElementById("test-result").textContent = JSON.stringify(data, null, 2));
+}
+</script>
+
+</body>
+</html>
